@@ -8,37 +8,90 @@ import CreateIcon from '@material-ui/icons/Create';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import CardHeader from '@material-ui/core/CardHeader';
-import IconButton from '@material-ui/core/IconButton'
-import AddIcon from '@material-ui/icons/Add'
+import IconButton from '@material-ui/core/IconButton';
+import AddIcon from '@material-ui/icons/Add';
+import TextField from '@material-ui/core/TextField';
+
+import Chip from '@material-ui/core/Chip'
+import {useState} from 'react'
+import axios  from 'axios';
 
 function ToDoList() {
 
-  let list = [1, 3, 4]
+  const [list, setList] = useState([
+    {
+      description: 'Arrumar casa',
+      status: false,
+    },
+    {
+      description: 'Arrumar casa',
+      status: true,
+    },
+    {
+      description: 'Arrumar casa',
+      status: true,
+    },
+    {
+      description: 'Arrumar casa',
+      status: false,
+    },
+    {
+      description: 'Arrumar casa',
+      status: false,
+    },
+  ])
+
+  const [listFiltred, setListFiltred] = useState(list)
+
+  function getNotes(){
+    axios.get('localhost:5000/notes/')
+      .then(response => this.setList(response.data))
+  }
+
+  function saveNotes(value){
+    axios.post('localhost:5000/notes/', value.target.value)
+      .then(response => response)
+  }
+
+  function deleteNotes(id){
+    axios.delete('localhost:5000/notes/', id)
+      .then(response => response)
+  }
+
+  function searchList(value){
+    let search = value.target.value;
+    setListFiltred(list.filter(item => item.description.toLowerCase().includes(search.toLowerCase())))
+  }
 
   return (
     <div className="ToDoList" sx={{ }}>
       <Card sx={{}}>
         <CardHeader action={
-            <IconButton aria-label="Adicionar" onClick={{this.}}>
+            <IconButton aria-label="Adicionar">
               <AddIcon />
             </IconButton>
           }
-          title="Todo List App"
+          title="TODO LIST" style={{backgroundColor: '#5B9CD4', textAlign: "center"}}
         />
         <CardContent>
+          <TextField label="Buscar" variant="filled" style={{width: '100%'}} onKeyUp={searchList} />
           <Box sx={{maxHeight: 940, bgcolor: 'background.paper' }}>
             <nav>
               <List>
                 {
-                  list.map(() => {
+                  listFiltred.map((item) => {
                     return (
                       <ListItem disablePadding>
-                        <ListItemText primary="Trash" />
+                        <ListItemText primary={item.description}/>
+                        {
+                          item.status ? <Chip label="Finalizada" style={{backgroundColor: '#D7EBD1'}}/> 
+                          : <Chip label="Em andamento" style={{backgroundColor: '#BDE8FF'}}/>
+                        }
                         <IconButton aria-label="Editar">
-                          <CreateIcon />
+                          <CreateIcon/>
                         </IconButton>
                         <IconButton aria-label="Deletar">
-                          <DeleteIcon />
+                          <DeleteIcon/>
                         </IconButton>
                       </ListItem>
                     )
