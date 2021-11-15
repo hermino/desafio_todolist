@@ -6,6 +6,7 @@
 - MySQL 8.0.27
 - Flask 2.0.0
 - Flask-SQLAlchemy 2.5.1
+- Flask CORS 3.0.10
 - mysqlclient 2.0.3
 
 ## FrontEnd
