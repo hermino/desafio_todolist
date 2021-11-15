@@ -19,3 +19,4 @@
 - Para executar basta cria um banco de dados chamado ```notas```;
 - Criar um enviroment para a execução;
 - Depois instalar as dependencias com ```python install -r requirements.txt```;
+- Por fim executar ```python routes.py```
