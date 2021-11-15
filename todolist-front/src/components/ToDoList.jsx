@@ -12,87 +12,124 @@ import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/Add';
 import TextField from '@material-ui/core/TextField';
 
-import Chip from '@material-ui/core/Chip'
-import {useState} from 'react'
-import axios  from 'axios';
+import Dialog from '@material-ui/core/Dialog'
+import DialogActions from '@material-ui/core/DialogActions'
+import DialogContentText from '@material-ui/core/DialogContentText'
+import DialogContent from '@material-ui/core/DialogContent'
+import DialogTitle from '@material-ui/core/DialogTitle'
+
+import { useState, useEffect } from 'react';
+import axios from 'axios';
+import { Button } from '@material-ui/core';
 
 function ToDoList() {
+  const [list, setList] = useState([])
+  const [listFiltred, setListFiltred] = useState([])
+  const [open, setOpen] = useState(false)
 
-  const [list, setList] = useState([
-    {
-      description: 'Arrumar casa',
-      status: false,
-    },
-    {
-      description: 'Arrumar casa',
-      status: true,
-    },
-    {
-      description: 'Arrumar casa',
-      status: true,
-    },
-    {
-      description: 'Arrumar casa',
-      status: false,
-    },
-    {
-      description: 'Arrumar casa',
-      status: false,
-    },
-  ])
+  const [description, setDescription] = useState([])
 
-  const [listFiltred, setListFiltred] = useState(list)
+  useEffect(() => {
+    axios.get('http://localhost:5000/nota/')
+      .then(response => {
+        let data = response.data;
+        let dataAux = []
 
-  function getNotes(){
-    axios.get('localhost:5000/notes/')
-      .then(response => this.setList(response.data))
+        Object.keys(data).map(key => {
+          dataAux.push(data[key])
+        })
+
+        setList(dataAux)
+        setListFiltred(dataAux)
+      })
+  }, [])
+
+  const handleClose = () => {
+    setOpen(false)
   }
 
-  function saveNotes(value){
-    axios.post('localhost:5000/notes/', value.target.value)
+  const handleClickOpen = () => {
+    setOpen(true)
+  }
+
+  const handleDescription = (event) => {
+    setDescription(event.target.value)
+  }
+
+  function reloadPage(){
+    setTimeout(() => {
+      window.location.reload(false)
+    }, 1000)
+  }
+
+  function saveNotes(event) {
+    event.preventDefault()
+    axios.post('http://localhost:5000/nota/', {description: description})
+       .then(response => response)
+
+    handleClose()
+    reloadPage()
+  }
+
+  function deleteNotes(id) {
+    console.log(id)
+    axios.delete(`http://localhost:5000/nota/${id}`)
       .then(response => response)
   }
 
-  function deleteNotes(id){
-    axios.delete('localhost:5000/notes/', id)
-      .then(response => response)
-  }
-
-  function searchList(value){
+  function searchList(value) {
     let search = value.target.value;
     setListFiltred(list.filter(item => item.description.toLowerCase().includes(search.toLowerCase())))
   }
 
   return (
-    <div className="ToDoList" sx={{ }}>
+    <div className="ToDoList" sx={{}}>
       <Card sx={{}}>
         <CardHeader action={
-            <IconButton aria-label="Adicionar">
-              <AddIcon />
-            </IconButton>
-          }
-          title="TODO LIST" style={{backgroundColor: '#5B9CD4', textAlign: "center"}}
+          <IconButton aria-label="Adicionar" onClick={handleClickOpen}>
+            <AddIcon />
+          </IconButton>
+        }
+          title="TODO LIST" style={{ backgroundColor: '#5B9CD4', textAlign: "center" }}
         />
+        <Dialog open={open}>
+          <DialogTitle>Savar atividade</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Digite a descrição da atividade a ser desenvolvida!
+            </DialogContentText>
+          </DialogContent>
+          <TextField label="Descrição" onChange={handleDescription} style={{width: '90%', marginLeft: 'auto', marginRight: 'auto'}} />
+          <DialogActions style={{width: '90%', marginLeft: 'auto', marginRight: 'auto'}}>
+            <Button onClick={handleClose} color="primary">
+              Cancelar
+            </Button>
+            <Button onClick={saveNotes} color="primary">
+              Salvar
+            </Button>
+          </DialogActions>
+        </Dialog>
         <CardContent>
-          <TextField label="Buscar" variant="filled" style={{width: '100%'}} onKeyUp={searchList} />
-          <Box sx={{maxHeight: 940, bgcolor: 'background.paper' }}>
+          <TextField label="Buscar" variant="filled" style={{ width: '100%' }} onKeyUp={searchList} />
+          <Box sx={{ maxHeight: 940, bgcolor: 'background.paper' }}>
             <nav>
               <List>
                 {
-                  listFiltred.map((item) => {
+
+                  listFiltred.map(item => {
                     return (
                       <ListItem disablePadding>
-                        <ListItemText primary={item.description}/>
-                        {
+                        <ListItemText primary={item.description} />
+                        {/* {
                           item.status ? <Chip label="Finalizada" style={{backgroundColor: '#D7EBD1'}}/> 
                           : <Chip label="Em andamento" style={{backgroundColor: '#BDE8FF'}}/>
-                        }
-                        <IconButton aria-label="Editar">
-                          <CreateIcon/>
-                        </IconButton>
-                        <IconButton aria-label="Deletar">
-                          <DeleteIcon/>
-                        </IconButton>
+                        } */}
+                        {/* <IconButton aria-label="Editar" onClick={handleClickOpen}>
+                          <CreateIcon />
+                        </IconButton> */}
+                        {/* <IconButton aria-label="Deletar" onClick={deleteNotes(item.id)}>
+                          <DeleteIcon />
+                        </IconButton> */}
                       </ListItem>
                     )
                   })
